@@ -93,11 +93,21 @@
         }
     }
     </dl>
-
-    @if(currentUser == item.creator && item.status == ItemStatus.Created) {
-        <form action="@routes.ItemController.startAuction(item.safeId)" method="POST">
-            <input class="button success" type="submit" value="@Messages("startAuction")"/>
-        </form>
+    @if(currentUser == item.creator) {
+        <div class="row">
+            @if(item.status == ItemStatus.Created) {
+            <div class="columns medium-6" >
+                <form action="@routes.ItemController.startAuction(item.safeId)" method="POST">
+                    <input class="button success" type="submit" value="@Messages("startAuction")"/>
+                </form>
+            </div>
+            }
+            @if(! Seq(ItemStatus.Completed, ItemStatus.Cancelled).contains(item.status)) {
+            <div class="columns medium-6" >
+                <a href="@routes.ItemController.updateItemForm(item.safeId)" class="button primary">@Messages("updateItem")</a>
+            </div>
+            }
+        </div>
     }
     @if(currentUser != item.creator && item.status == ItemStatus.Auction) {
         <h3>@Messages("placeBid")</h3>

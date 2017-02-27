@@ -34,6 +34,14 @@ trait ItemService extends Service {
   def getItem(id: UUID): ServiceCall[NotUsed, Item]
 
   /**
+    * Update an item.
+    *
+    * @param id The id of the item to edit
+    * @return The created item with its ID populated.
+    */
+  def updateItem(id: UUID): ServiceCall[Item, Item]
+
+  /**
     * Get a list of items for the given user.
     *
     * @param id       The ID of the user.
@@ -56,6 +64,7 @@ trait ItemService extends Service {
       pathCall("/api/item", createItem),
       restCall(Method.POST, "/api/item/:id/start", startAuction _),
       pathCall("/api/item/:id", getItem _),
+      restCall(Method.PUT, "/api/item/:id", updateItem _),
       pathCall("/api/item?userId&status&pageNo&pageSize", getItemsForUser _)
     ).withTopics(
       topic("item-ItemEvent", this.itemEvents)

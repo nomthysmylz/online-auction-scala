@@ -129,6 +129,58 @@ class ItemController(messagesApi: MessagesApi, userService: UserService, itemSer
     }
   }
 
+  def updateItemForm(itemId: UUID) = Action.async{ implicit rh =>
+    requireUser(user => loadNav(user).flatMap { implicit nav =>
+      val itemFuture = itemService.getItem(itemId)
+        .handleRequestHeader(authenticate(user)).invoke()
+      for( item <- itemFuture ) yield{
+        val (duration, durationUnits) = (item.auctionDuration.getSeconds match{
+          case l: Long => if(l < 60)
+              Seq((l, ChronoUnit.SECONDS))
+            else
+              ChronoUnit.values
+              .dropWhile(_ != ChronoUnit.MINUTES)
+              .takeWhile(_ != ChronoUnit.MONTHS)
+              .map{ unit => (l/unit.getDuration.getSeconds, unit) }.toSeq
+        }).filterNot(_._1 == 0).reverse.head
+        val currency = Currency.valueOf(item.currencyId)
+        val increment = currency.formatDecimal(item.increment).toDouble
+        val reservePrice = currency.formatDecimal(item.reservePrice).toDouble
+        val itemForm = ItemForm.fill(ItemForm(item.id, item.title, item.description, currency, increment, reservePrice, duration.toInt, durationUnits))
+        Ok(views.html.updateItem(itemForm, item))
+      }
+    })
+  }
+
+  def doUpdateItem(itemId: UUID) = Action.async{ implicit rh=>
+          
+    requireUser(user => 
+          itemService.getItem(itemId)
+          .handleRequestHeader(authenticate(user))
+          .invoke().map{item =>
+            if(item.status == ItemStatus.Created){
+              ItemForm.bind(rh).fold(
+                errorForm => {
+                  Ok("@todo error form")
+                },
+                itemForm => {
+                  Ok("@todo update item")
+                }
+              )
+            }else{
+              UpdateItemFormAuctionStarted.form.bindFromRequest().fold(
+                errorForm => {
+                  Ok("@todo error form auction started")
+                },
+                updateDescriptionForm => {
+                  Ok("@todo update auction started form")
+                }
+              )
+            }
+        }   
+    )
+  }
+
   def startAuction(itemId: UUID) = Action.async { implicit rh =>
     requireUser { user =>
       itemService.startAuction(itemId)
@@ -168,6 +220,20 @@ object FormMappings {
   val currency = nonEmptyText
     .verifying("invalid.currency", c => Currency.isDefined(c))
     .transform[Currency](Currency.valueOf, _.name)
+}
+
+case class UpdateItemFormAuctionStarted(id: Option[UUID] = None, description: String)
+
+object UpdateItemFormAuctionStarted{
+  def fill(itemForm: UpdateItemFormAuctionStarted): Form[UpdateItemFormAuctionStarted] = form.fill(itemForm)
+
+  val form = Form(mapping(
+            "id" -> optional(
+                text.verifying("invalid.id", id => Try(UUID.fromString(id)).isSuccess)
+                  .transform[UUID](UUID.fromString, _.toString)
+              ),
+            "description" -> nonEmptyText
+          )(UpdateItemFormAuctionStarted.apply)(UpdateItemFormAuctionStarted.unapply))
 }
 
 case class ItemForm(

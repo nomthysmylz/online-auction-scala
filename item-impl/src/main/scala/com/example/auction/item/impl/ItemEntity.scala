@@ -151,6 +151,12 @@ case class CreateItem(item: Item) extends ItemCommand with ReplyType[Done]
 object CreateItem {
   implicit val format: Format[CreateItem] = Json.format
 }
+
+case class UpdateItem(item: Item) extends ItemCommand with ReplyType[Done]
+  
+object UpdateItem {
+  implicit val format: Format[UpdateItem] = Json.format
+}
   
 case class StartAuction(userId: UUID) extends ItemCommand with ReplyType[Done]
 

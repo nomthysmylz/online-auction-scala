@@ -31,6 +31,14 @@ class ItemServiceImpl(registry: PersistentEntityRegistry, itemRepository: ItemRe
     }
   })
 
+  override def updateItem(id: UUID) = authenticated(userId => ServerServiceCall{ item =>
+    val pItem = Item(item.id.get, item.creator, item.title, item.description, item.currencyId, item.increment,
+      item.reservePrice, None, ItemStatus.Created, item.auctionDuration, None, None, None)
+    entityRef(id).ask(UpdateItem(pItem)).map{ _ =>
+      convertItem(pItem)
+    }
+  })
+
   override def startAuction(id: UUID) = authenticated(userId => ServerServiceCall { _ =>
     entityRef(id).ask(StartAuction(userId))
   })

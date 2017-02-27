@@ -17,6 +17,8 @@ status=Auction status
 duration=Auction duration
 durationUnits=Units
 createItem=Create item
+updateItem=Update Item
+itemLimitedEdit=You can only update an item's description once the auction has been started.
 
 invalid.increment=The increment must be a multiple of 0.5.
 invalid.reserve=The reserve must be a multiple of 0.5.

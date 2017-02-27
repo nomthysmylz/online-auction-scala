@@ -7,6 +7,7 @@ object ItemSerializerRegistry extends JsonSerializerRegistry {
     JsonSerializer[Item],
 
     JsonSerializer[CreateItem],
+    JsonSerializer[UpdateItem],
     JsonSerializer[StartAuction],
     JsonSerializer[UpdatePrice],
     JsonSerializer[FinishAuction],

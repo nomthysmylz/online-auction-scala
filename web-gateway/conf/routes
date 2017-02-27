@@ -13,6 +13,8 @@ GET         /my/items/:status           controllers.ProfileController.myItems(st
 GET         /createitem                 controllers.ItemController.createItemForm
 POST        /item                       controllers.ItemController.createItem
 GET         /item/:id                   controllers.ItemController.getItem(id: java.util.UUID)
+GET         /item/edit/:id              controllers.ItemController.updateItemForm(id: java.util.UUID)
+POST        /item/edit/:id              controllers.ItemController.doUpdateItem(id: java.util.UUID)
 POST        /item/:id/auction           controllers.ItemController.startAuction(id: java.util.UUID)
 POST        /item/:id/bid               controllers.ItemController.placeBid(id: java.util.UUID)
 
